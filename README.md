@@ -9,4 +9,4 @@ DMG Indicator - release soon.
 ```
 
 
-![alt tag](http://i.imgur.com/0iSQWvA.png)
+<div style="text-align:center"><img src ="http://i.imgur.com/0iSQWvA.png" /></div>

@@ -1,5 +1,4 @@
-# Welcome to my REPO for some LOL Scripts (L#)
+Welcome to my REPO for some LOL Scripts (L#)
 
-
-1. DMG Indicator
+~~1. DMG Indicator~~
 

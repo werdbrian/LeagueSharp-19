@@ -52,38 +52,13 @@ namespace DMGinc
         //Spells
         protected readonly List<Spell> SpellList = new List<Spell>();
 
-        protected Spell P;
-        protected Spell Q;
-        protected Spell Q2;
-        protected Spell QExtend;
-        protected Spell W;
-        protected Spell W2;
-        protected Spell E;
-        protected Spell E2;
-        protected Spell R;
-        protected Spell R2;
-        protected readonly SpellDataInst QSpell = ObjectManager.Player.Spellbook.GetSpell(SpellSlot.Q);
-        protected readonly SpellDataInst ESpell = ObjectManager.Player.Spellbook.GetSpell(SpellSlot.E);
-        protected readonly SpellDataInst WSpell = ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W);
-        protected readonly SpellDataInst RSpell = ObjectManager.Player.Spellbook.GetSpell(SpellSlot.R);
-
-        //summoners
-        private readonly SpellSlot _igniteSlot = ObjectManager.Player.GetSpellSlot("SummonerDot");
-        public readonly SpellSlot _flashSlot = ObjectManager.Player.GetSpellSlot("SummonerFlash");
         //items
         protected readonly Items.Item Dfg = Utility.Map.GetMap().Type == Utility.Map.MapType.TwistedTreeline ? new Items.Item(3188, 750) : new Items.Item(3128, 750);
         protected int LastPlaced;
         protected Vector3 LastWardPos;
 
-        //Mana Manager
-        protected int[] QMana = { 0, 0, 0, 0, 0, 0 };
-        protected int[] WMana = { 0, 0, 0, 0, 0, 0 };
-        protected int[] EMana = { 0, 0, 0, 0, 0, 0 };
-        protected int[] RMana = { 0, 0, 0, 0, 0, 0 };
-
         //Menu
         protected static Menu menu;
-        private static readonly Menu OrbwalkerMenu = new Menu("Orbwalker", "Orbwalker");
 
         private void GameOnLoad()
         {
@@ -96,25 +71,6 @@ namespace DMGinc
             menu.AddSubMenu(new Menu("Info", "Info"));
             menu.SubMenu("Info").AddItem(new MenuItem("Author", "By xSalice"));
             menu.SubMenu("Info").AddItem(new MenuItem("Paypal", "Donate: xSalicez@gmail.com"));
-
-            //Target selector
-            var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
-            TargetSelector.AddToMenu(targetSelectorMenu);
-            menu.AddSubMenu(targetSelectorMenu);
-
-            //Orbwalker submenu
-            OrbwalkerMenu.AddItem(new MenuItem("Orbwalker_Mode", "Change Orbwalker", true).SetValue(false));
-            menu.AddSubMenu(OrbwalkerMenu);
-            ChooseOrbwalker(menu.Item("Orbwalker_Mode", true).GetValue<bool>());
-
-            //Packet Menu
-            menu.AddSubMenu(new Menu("Packet Setting", "Packets"));
-            menu.SubMenu("Packets").AddItem(new MenuItem("packet", "Use Packets", true).SetValue(false));
-
-            //Item Menu
-            var itemMenu = new Menu("Items and Summoners", "Items");
-            ActiveItems.AddToMenu(itemMenu);
-            menu.AddSubMenu(itemMenu);
 
             menu.AddToMainMenu();
 
@@ -131,45 +87,9 @@ namespace DMGinc
             }
         }
 
-        private void ChooseOrbwalker(bool mode)
-        {
-            if (Player.ChampionName == "Azir")
-            {
-                xSLxOrbwalker.AddToMenu(OrbwalkerMenu);
-                Game.PrintChat("xSLx Orbwalker Loaded");
-                return;
-            }
-
-            if (mode)
-            {
-                _orbwalker = new Orbwalking.Orbwalker(OrbwalkerMenu);
-                Game.PrintChat("Regular Orbwalker Loaded");
-            }
-            else
-            {
-                xSLxOrbwalker.AddToMenu(OrbwalkerMenu);
-                Game.PrintChat("xSLx Orbwalker Loaded");
-            }
-        }
         protected bool packets()
         {
             return menu.Item("packet", true).GetValue<bool>();
-        }
-
-        protected void Use_DFG(Obj_AI_Hero target)
-        {
-            if (target != null && Player.Distance(target) < 750 && Items.CanUseItem(Dfg.Id))
-                Items.UseItem(Dfg.Id, target);
-        }
-
-        protected bool Ignite_Ready()
-        {
-            return _igniteSlot != SpellSlot.Unknown && Player.Spellbook.CanUseSpell(_igniteSlot) == SpellState.Ready;
-        }
-
-        protected bool Flash_Ready()
-        {
-            return _flashSlot != SpellSlot.Unknown && Player.Spellbook.CanUseSpell(_flashSlot) == SpellState.Ready;
         }
 
         protected float GetHealthPercent(Obj_AI_Hero unit = null)
@@ -178,73 +98,12 @@ namespace DMGinc
                 unit = Player;
             return (unit.Health / unit.MaxHealth) * 100f;
         }
-        protected bool HasBuff(Obj_AI_Base target, string buffName)
-        {
-            return target.Buffs.Any(buff => buff.Name == buffName);
-        }
 
-        private bool IsWall(Vector2 pos)
-        {
-            return (NavMesh.GetCollisionFlags(pos.X, pos.Y) == CollisionFlags.Wall ||
-                    NavMesh.GetCollisionFlags(pos.X, pos.Y) == CollisionFlags.Building);
-        }
-        protected bool IsPassWall(Vector3 start, Vector3 end)
-        {
-            double count = Vector3.Distance(start, end);
-            for (uint i = 0; i <= count; i += 25)
-            {
-                Vector2 pos = start.To2D().Extend(Player.ServerPosition.To2D(), -i);
-                if (IsWall(pos))
-                    return true;
-            }
-            return false;
-        }
         protected int countEnemiesNearPosition(Vector3 pos, float range)
         {
             return
                 ObjectManager.Get<Obj_AI_Hero>().Count(
                     hero => hero.IsEnemy && !hero.IsDead && hero.IsValid && hero.Distance(pos) <= range);
-        }
-
-        protected int countAlliesNearPosition(Vector3 pos, float range)
-        {
-            return
-                ObjectManager.Get<Obj_AI_Hero>().Count(
-                    hero => hero.IsAlly && !hero.IsDead && hero.IsValid && hero.Distance(pos) <= range);
-        }
-
-        protected bool ManaCheck()
-        {
-            int totalMana = QMana[Q.Level] + WMana[W.Level] + EMana[E.Level] + RMana[R.Level];
-            var checkMana = menu.Item("mana", true).GetValue<bool>();
-
-            if (Player.Mana >= totalMana || !checkMana)
-                return true;
-
-            return false;
-        }
-
-        protected bool ManaCheck2()
-        {
-            int totalMana = QMana[Q.Level] + WMana[W.Level] + EMana[E.Level] + RMana[R.Level];
-
-            if (Player.Mana >= totalMana)
-                return true;
-
-            return false;
-        }
-
-        protected bool IsStunned(Obj_AI_Base target)
-        {
-            if (target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare) ||
-                target.HasBuffOfType(BuffType.Suppression) || target.HasBuffOfType(BuffType.Taunt))
-                return true;
-
-            return false;
-        }
-        protected bool IsRecalling()
-        {
-            return Player.HasBuff("Recall");
         }
 
         protected PredictionOutput GetP(Vector3 pos, Spell spell, Obj_AI_Base target, float delay, bool aoe)

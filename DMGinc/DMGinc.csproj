@@ -71,7 +71,7 @@
   <ItemGroup>
     <Compile Include="ActiveItemes.cs" />
     <Compile Include="Orbwalker.cs" />
-    <Compile Include="loading.cs" />
+    <Compile Include="Champion.cs" />
     <Compile Include="DamageIndicator.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -1,1 +1,2 @@
 c:\users\siak0r\documents\visual studio 2015\Projects\DMGinc\DMGinc\bin\Debug\DMGinc.exe.config
+C:\Users\siak0r\Documents\Visual Studio 2015\Projects\Leaguesharp\DMGinc\LeagueSharp\DMGinc\bin\Debug\DMGinc.exe.config

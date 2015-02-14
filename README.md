@@ -1,7 +1,5 @@
-# Damage Indicator 
-
-- thanks Xoy for the Idea
-- stolen by xSlaice
+# Welcome to my REPO for some LOL Scripts (L#)
 
 
-the End.
+1. DMG Indicator
+

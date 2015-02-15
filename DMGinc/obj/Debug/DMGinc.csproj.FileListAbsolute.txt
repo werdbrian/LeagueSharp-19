@@ -1,2 +1,0 @@
-C:\Users\siak0r\Documents\Visual Studio 2015\Projects\Leaguesharp\DMGinc\LeagueSharp\DMGinc\obj\Debug\DMGinc.csprojResolveAssemblyReference.cache
-C:\Users\siak0r\Documents\Visual Studio 2015\Projects\Leaguesharp\DMGinc\LeagueSharp\DMGinc\bin\Release\DMGinc.exe.config

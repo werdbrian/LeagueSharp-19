@@ -85,6 +85,10 @@ namespace DMGinc
             {
                 Game.PrintChat("xSalice's Religion => {0} Not Support !", Player.ChampionName);
             }
+
+
+            DamageIndicator champs = new Champion(true);
+
         }
 
         protected bool packets()
@@ -97,13 +101,6 @@ namespace DMGinc
             if (unit == null)
                 unit = Player;
             return (unit.Health / unit.MaxHealth) * 100f;
-        }
-
-        protected int countEnemiesNearPosition(Vector3 pos, float range)
-        {
-            return
-                ObjectManager.Get<Obj_AI_Hero>().Count(
-                    hero => hero.IsEnemy && !hero.IsDead && hero.IsValid && hero.Distance(pos) <= range);
         }
 
         protected PredictionOutput GetP(Vector3 pos, Spell spell, Obj_AI_Base target, float delay, bool aoe)
@@ -185,200 +182,6 @@ namespace DMGinc
             return new object[] { pointSegment, pointLine, isOnSegment };
         }
 
-        protected void CastBasicSkillShot(Spell spell, float range, TargetSelector.DamageType type, HitChance hitChance, bool towerCheck = false)
-        {
-            var target = TargetSelector.GetTarget(range, type);
 
-            if (target == null || !spell.IsReady())
-                return;
-
-            if (towerCheck && target.UnderTurret(true))
-                return;
-
-            spell.UpdateSourcePosition();
-
-            if (spell.GetPrediction(target).Hitchance >= hitChance)
-                spell.Cast(target, packets());
-        }
-
-        protected void CastBasicFarm(Spell spell)
-        {
-            if (!spell.IsReady())
-                return;
-            var minion = MinionManager.GetMinions(Player.ServerPosition, spell.Range, MinionTypes.All, MinionTeam.NotAlly);
-
-            if (minion.Count == 0)
-                return;
-
-            if (spell.Type == SkillshotType.SkillshotCircle)
-            {
-                spell.UpdateSourcePosition();
-
-                var predPosition = spell.GetCircularFarmLocation(minion);
-
-                if (predPosition.MinionsHit >= 2)
-                {
-                    spell.Cast(predPosition.Position, Player.ChampionName == "Kartus" || packets());
-                }
-            }
-            else if (spell.Type == SkillshotType.SkillshotLine)
-            {
-                spell.UpdateSourcePosition();
-
-                var predPosition = spell.GetLineFarmLocation(minion);
-
-                if (predPosition.MinionsHit >= 2)
-                    spell.Cast(predPosition.Position, packets());
-            }
-        }
-
-        protected Obj_AI_Hero GetTargetFocus(float range)
-        {
-            var focusSelected = menu.Item("selected", true).GetValue<bool>();
-
-            if (TargetSelector.GetSelectedTarget() != null)
-                if (focusSelected && TargetSelector.GetSelectedTarget().Distance(Player.ServerPosition) < range + 100 && TargetSelector.GetSelectedTarget().Type == GameObjectType.obj_AI_Hero)
-                {
-                    //Game.PrintChat("Focusing: " + TargetSelector.GetSelectedTarget().Name);
-                    return TargetSelector.GetSelectedTarget();
-                }
-            return null;
-        }
-
-        protected HitChance GetHitchance(string source)
-        {
-            var hitC = HitChance.High;
-            int qHit = menu.Item("qHit", true).GetValue<Slider>().Value;
-            int harassQHit = menu.Item("qHit2", true).GetValue<Slider>().Value;
-
-            // HitChance.Low = 3, Medium , High .... etc..
-            if (source == "Combo")
-            {
-                switch (qHit)
-                {
-                    case 1:
-                        hitC = HitChance.Low;
-                        break;
-                    case 2:
-                        hitC = HitChance.Medium;
-                        break;
-                    case 3:
-                        hitC = HitChance.High;
-                        break;
-                    case 4:
-                        hitC = HitChance.VeryHigh;
-                        break;
-                }
-            }
-            else if (source == "Harass")
-            {
-                switch (harassQHit)
-                {
-                    case 1:
-                        hitC = HitChance.Low;
-                        break;
-                    case 2:
-                        hitC = HitChance.Medium;
-                        break;
-                    case 3:
-                        hitC = HitChance.High;
-                        break;
-                    case 4:
-                        hitC = HitChance.VeryHigh;
-                        break;
-                }
-            }
-
-            return hitC;
-        }
-        protected void AddManaManagertoMenu(Menu myMenu, String source, int standard)
-        {
-            myMenu.AddItem(new MenuItem(source + "_Manamanager", "Mana Manager", true).SetValue(new Slider(standard)));
-        }
-
-        protected bool FullManaCast()
-        {
-            if (Player.Mana >= QSpell.ManaCost + WSpell.ManaCost + ESpell.ManaCost + RSpell.ManaCost)
-                return true;
-            return false;
-        }
-
-        protected bool HasMana(string source)
-        {
-            if (Player.ManaPercentage() > menu.Item(source + "_Manamanager", true).GetValue<Slider>().Value)
-                return true;
-            return false;
-        }
-
-        //to create by champ
-        protected virtual void Drawing_OnDraw(EventArgs args)
-        {
-            //for champs to use
-        }
-
-        protected virtual void AntiGapcloser_OnEnemyGapcloser(ActiveGapcloser gapcloser)
-        {
-            //for champs to use
-        }
-
-        protected virtual void Interrupter_OnPosibleToInterrupt(Obj_AI_Hero unit, Interrupter2.InterruptableTargetEventArgs spell)
-        {
-            //for champs to use
-        }
-
-        protected virtual void Game_OnGameUpdate(EventArgs args)
-        {
-            //for champs to use
-        }
-
-        protected virtual void GameObject_OnCreate(GameObject sender, EventArgs args)
-        {
-            //for champs to use
-        }
-
-        protected virtual void GameObject_OnDelete(GameObject sender, EventArgs args)
-        {
-            //for champs to use
-        }
-
-        protected virtual void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base unit, GameObjectProcessSpellCastEventArgs args)
-        {
-            //for champ use
-        }
-
-        protected virtual void Game_OnSendPacket(GamePacketEventArgs args)
-        {
-            //for champ use
-        }
-
-        protected virtual void Game_OnGameProcessPacket(GamePacketEventArgs args)
-        {
-            //for champ use
-        }
-
-        protected virtual void AfterAttack(AttackableUnit unit, AttackableUnit target)
-        {
-            //for champ use
-        }
-
-        protected virtual void BeforeAttack(Orbwalking.BeforeAttackEventArgs args)
-        {
-            //for champ use
-        }
-
-        protected virtual void BeforeAttack(xSLxOrbwalker.BeforeAttackEventArgs args)
-        {
-            //for champ use
-        }
-
-        protected virtual void ObjAiHeroOnOnIssueOrder(Obj_AI_Base sender, GameObjectIssueOrderEventArgs args)
-        {
-            //for champ use
-        }
-
-        protected virtual void Spellbook_OnUpdateChargedSpell(Spellbook sender, SpellbookUpdateChargedSpellEventArgs args)
-        {
-            //for champ use
-        }
     }
 }

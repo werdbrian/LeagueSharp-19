@@ -12,7 +12,8 @@ namespace DMGinc
 
         static void LoadReligion(EventArgs args)
         {
-            Champion champs = new Champion(true);
+            //something in here ? XD
+
         }
     }
 }

@@ -23,9 +23,11 @@ namespace DMGinc
         public static Spell R;
 
         private static MenuItem drawFill;
+        private static MenuItem drawLine;
 
         public delegate float DamageToUnitDelegate(Obj_AI_Hero hero);
-        
+        public static Orbwalking.Orbwalker Orbwalker;
+
         private const int XOffset = 10;
         private const int YOffset = 20;
         private const int Width = 103;
@@ -37,7 +39,7 @@ namespace DMGinc
 
         public static bool Enabled = true;
         private static DamageToUnitDelegate _damageToUnit;
-
+        private static Notification welcome;
         private static readonly Render.Text Text = new Render.Text(
             0, 0, "", 11, new ColorBGRA(255, 0, 0, 255), "monospace");
 
@@ -49,9 +51,9 @@ namespace DMGinc
 
             #region Hello
 
-
-            Game.PrintChat("<font color=\"#AF7AFF\"><b>Damage Indicator</b></font> for " + Player.ChampionName + " - Loaded");
-
+            //Game.PrintChat("<font color=\"#AF7AFF\"><b>Damage Indicator</b></font> for " + Player.ChampionName + " - Loaded");
+            Notifications.AddNotification("Damage Indicator for " + Player.ChampionName, 10, true);
+            
             #endregion
 
         }
@@ -69,8 +71,10 @@ namespace DMGinc
                 //Drawings.AddItem(new MenuItem("drawr", "Show R Range")).SetValue(true);
             }
             _menu.AddSubMenu(Drawings);
-            drawFill = new MenuItem("Draw_Fill", "Draw Combo Damage Fill", true).SetValue(new Circle(true, Color.FromArgb(90, 255, 169, 4)));
+            drawFill = new MenuItem("Draw_Fill", "Draw Combo Damage (Fill)", true).SetValue(new Circle(true, Color.FromArgb(90, 255, 169, 4)));
+            drawLine = new MenuItem("Draw_Line", "Draw Combo Damage (Line)", true).SetValue(new Circle(true, Color.FromArgb(90, 255, 169, 4)));
             Drawings.AddItem(drawFill);
+            Drawings.AddItem(drawLine);
             _menu.AddToMainMenu();
             #endregion 
 
@@ -100,6 +104,8 @@ namespace DMGinc
                 Class1.Enabled = true;
                 Class1.Fill = drawFill.GetValue<Circle>().Active;
                 Class1.FillColor = drawFill.GetValue<Circle>().Color;
+                Class1.Color = drawLine.GetValue<Circle>().Color;
+                Class1.ColorFill = drawLine.GetValue<Circle>().Active;
             }
 
         }

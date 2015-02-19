@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
@@ -20,6 +21,7 @@ namespace DMGinc
         private const int Height = 8;
 
         public static System.Drawing.Color Color = Color.Lime;
+        public static bool ColorFill = true;
         public static Color FillColor = Color.Goldenrod;
         public static bool Fill = true;
 
@@ -64,11 +66,13 @@ namespace DMGinc
                 {
                     Text.X = (int) barPos.X + XOffset;
                     Text.Y = (int) barPos.Y + YOffset - 13;
-                    Text.text = ((int) (unit.Health - damage)).ToString();
+                    Text.Color = new ColorBGRA(255,255,255,255);
+                    Text.text = "Save kill !";
                     Text.OnEndScene();
                 }
 
-                Drawing.DrawLine(xPosDamage, yPos, xPosDamage, yPos + Height, 2, Color);
+                if (ColorFill)
+                    Drawing.DrawLine(xPosDamage, yPos, xPosDamage, yPos + Height, 2, Color);
 
                 if (Fill)
                 {

@@ -1,7 +1,8 @@
 # Damage Indicator 
 
 - thanks Xoy for the Idea
-- stolen by xSlaice
+- THANKS FOR USING BITCHES
+- CREDITS TO <b>xSlaice</b>
 
 
 the End.

@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.Eventing.Reader;
 using LeagueSharp;
 using LeagueSharp.Common;
-using System.Drawing.Text;
-using System.Linq;
+using _Damage = LeagueSharp.Common.Damage;
 using SharpDX;
 using Color = System.Drawing.Color;
 
@@ -16,7 +13,6 @@ namespace DMGinc
         public static Obj_AI_Hero Player;
         private static Obj_AI_Hero _target;
         private static Menu _menu;
-
         public static Spell Q;
         public static Spell W;
         public static Spell E;
@@ -117,22 +113,82 @@ namespace DMGinc
 
             double damage = 0d;
 
+            #region Q Spell Calc
             if (Q.IsReady())
-                damage += Player.GetSpellDamage(enemy, SpellSlot.Q);
+            {
+                if (Q.DamageType == TargetSelector.DamageType.Magical)
+                {
+                    damage += Player.CalcDamage(enemy, _Damage.DamageType.Magical, Player.GetSpellDamage(enemy, SpellSlot.Q));
+                }
+                else if (Q.DamageType == TargetSelector.DamageType.Physical)
+                {
+                    damage += Player.CalcDamage(enemy, _Damage.DamageType.Physical, Player.GetSpellDamage(enemy, SpellSlot.Q));
+                }
+                else if (Q.DamageType == TargetSelector.DamageType.True)
+                {
+                    damage += Player.CalcDamage(enemy, _Damage.DamageType.True, Player.GetSpellDamage(enemy, SpellSlot.Q));
+                }
+            }
+            #endregion
 
+            #region W Spell Calc
             if (W.IsReady())
-                damage += Player.GetSpellDamage(enemy, SpellSlot.W);
+            {
+                if (W.DamageType == TargetSelector.DamageType.Magical)
+                {
+                    damage += Player.CalcDamage(enemy, _Damage.DamageType.Magical, Player.GetSpellDamage(enemy, SpellSlot.W));
+                }
+                else if (W.DamageType == TargetSelector.DamageType.Physical)
+                {
+                    damage += Player.CalcDamage(enemy, _Damage.DamageType.Physical, Player.GetSpellDamage(enemy, SpellSlot.W));
+                }
+                else if (W.DamageType == TargetSelector.DamageType.True)
+                {
+                    damage += Player.CalcDamage(enemy, _Damage.DamageType.True, Player.GetSpellDamage(enemy, SpellSlot.W));
+                }
+            }
+            #endregion
 
-            if (R.IsReady())
-                damage += Player.GetSpellDamage(enemy, SpellSlot.R);
-
+            #region E Spell Calc
             if (E.IsReady())
-                damage += Player.GetSpellDamage(enemy, SpellSlot.E);
+            {
+                if (E.DamageType == TargetSelector.DamageType.Magical)
+                {
+                    damage += Player.CalcDamage(enemy, _Damage.DamageType.Magical, Player.GetSpellDamage(enemy, SpellSlot.E));
+                }
+                else if (E.DamageType == TargetSelector.DamageType.Physical)
+                {
+                    damage += Player.CalcDamage(enemy, _Damage.DamageType.Physical, Player.GetSpellDamage(enemy, SpellSlot.E));
+                }
+                else if (E.DamageType == TargetSelector.DamageType.True)
+                {
+                    damage += Player.CalcDamage(enemy, _Damage.DamageType.True, Player.GetSpellDamage(enemy, SpellSlot.E));
+                }
+            }
+            #endregion
 
-            damage += Player.GetAutoAttackDamage(enemy);
+            #region R Spell Calc
+            if (R.IsReady())
+            {
+                if (R.DamageType == TargetSelector.DamageType.Magical)
+                {
+                    damage += Player.CalcDamage(enemy, _Damage.DamageType.Magical, Player.GetSpellDamage(enemy, SpellSlot.R));
+                }
+                else if (R.DamageType == TargetSelector.DamageType.Physical)
+                {
+                    damage += Player.CalcDamage(enemy, _Damage.DamageType.Physical, Player.GetSpellDamage(enemy, SpellSlot.R));
+                }
+                else if (R.DamageType == TargetSelector.DamageType.True)
+                {
+                    damage += Player.CalcDamage(enemy, _Damage.DamageType.True, Player.GetSpellDamage(enemy, SpellSlot.R));
+                }
+            }
+            #endregion
 
+            damage += Player.CalcDamage(enemy, _Damage.DamageType.Physical, Player.GetAutoAttackDamage(enemy));
+            
             damage = ActiveItems.CalcDamage(enemy, damage);
-
+            
             return (float)damage;
 
         }

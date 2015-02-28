@@ -11,7 +11,7 @@ using Color = System.Drawing.Color;
 
 namespace DMGinc
 {
-    internal class Class1
+    internal class DamageIndicator
     {
         public delegate float DamageToUnitDelegate(Obj_AI_Hero hero);
 

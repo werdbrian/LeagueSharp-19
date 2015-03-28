@@ -38,11 +38,11 @@ namespace DMGinc
         static void Main(string[] args)
         {
 
-            Game.OnUpdate += Game_OnUpdate;
+            Game.OnUpdate += Game_OnGameUpdate;
 
         }
 
-        static void Game_OnUpdate(EventArgs args)
+        static void Game_OnGameUpdate(EventArgs args)
         {
 
             #region sayings

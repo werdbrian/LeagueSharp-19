@@ -31,18 +31,18 @@ namespace DMGinc
         private static readonly Render.Text Text = new Render.Text(
             0, 0, "", 11, new ColorBGRA(255, 0, 0, 255), "monospace");
 
-        private static float percentpenetrationarmor;
-        private static float percentpenetrationmagic;
+        private static float _percentpenetrationarmor;
+        private static float _percentpenetrationmagic;
         #endregion
 
         static void Main(string[] args)
         {
 
-            CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
+            Game.OnUpdate += Game_OnUpdate;
 
         }
 
-        static void Game_OnGameLoad(EventArgs args)
+        static void Game_OnUpdate(EventArgs args)
         {
 
             #region sayings
@@ -79,8 +79,8 @@ namespace DMGinc
 
             if (Player.IsDead != true)
             {
-                percentpenetrationarmor = ((1 - Player.PercentArmorPenetrationMod) + 1);
-                percentpenetrationmagic = ((1 - Player.PercentMagicPenetrationMod) + 1);
+                _percentpenetrationarmor = ((1 - Player.PercentArmorPenetrationMod) + 1);
+                _percentpenetrationmagic = ((1 - Player.PercentMagicPenetrationMod) + 1);
                 DamageIndicator.DamageToUnit = GetComboDamage;
                 DamageIndicator.Enabled = true;
                 DamageIndicator.Fill = drawFill.GetValue<Circle>().Active;
@@ -107,12 +107,12 @@ namespace DMGinc
                 if (Q.DamageType == TargetSelector.DamageType.Magical)
                 {
                     damage +=
-                        Player.CalcDamage(enemy, _Damage.DamageType.Magical, Player.GetSpellDamage(enemy, SpellSlot.Q)) * percentpenetrationmagic;
+                        Player.CalcDamage(enemy, _Damage.DamageType.Magical, Player.GetSpellDamage(enemy, SpellSlot.Q)) * _percentpenetrationmagic;
                 }
                 else if (Q.DamageType == TargetSelector.DamageType.Physical)
                 {
                     damage += 
-                        Player.CalcDamage(enemy, _Damage.DamageType.Physical, Player.GetSpellDamage(enemy, SpellSlot.Q)) * percentpenetrationarmor;
+                        Player.CalcDamage(enemy, _Damage.DamageType.Physical, Player.GetSpellDamage(enemy, SpellSlot.Q)) * _percentpenetrationarmor;
                 }
                 else if (Q.DamageType == TargetSelector.DamageType.True)
                 {
@@ -129,12 +129,12 @@ namespace DMGinc
                 if (W.DamageType == TargetSelector.DamageType.Magical)
                 {
                     damage += 
-                        Player.CalcDamage(enemy, _Damage.DamageType.Magical, Player.GetSpellDamage(enemy, SpellSlot.W)) * percentpenetrationmagic;
+                        Player.CalcDamage(enemy, _Damage.DamageType.Magical, Player.GetSpellDamage(enemy, SpellSlot.W)) * _percentpenetrationmagic;
                 }
                 else if (W.DamageType == TargetSelector.DamageType.Physical)
                 {
                     damage += 
-                        Player.CalcDamage(enemy, _Damage.DamageType.Physical, Player.GetSpellDamage(enemy, SpellSlot.W)) * percentpenetrationarmor;
+                        Player.CalcDamage(enemy, _Damage.DamageType.Physical, Player.GetSpellDamage(enemy, SpellSlot.W)) * _percentpenetrationarmor;
                 }
                 else if (W.DamageType == TargetSelector.DamageType.True)
                 {
@@ -149,11 +149,11 @@ namespace DMGinc
             {
                 if (E.DamageType == TargetSelector.DamageType.Magical)
                 {
-                    damage += Player.CalcDamage(enemy, _Damage.DamageType.Magical, Player.GetSpellDamage(enemy, SpellSlot.E)) * percentpenetrationmagic;
+                    damage += Player.CalcDamage(enemy, _Damage.DamageType.Magical, Player.GetSpellDamage(enemy, SpellSlot.E)) * _percentpenetrationmagic;
                 }
                 else if (E.DamageType == TargetSelector.DamageType.Physical)
                 {
-                    damage += Player.CalcDamage(enemy, _Damage.DamageType.Physical, Player.GetSpellDamage(enemy, SpellSlot.E)) * percentpenetrationarmor;
+                    damage += Player.CalcDamage(enemy, _Damage.DamageType.Physical, Player.GetSpellDamage(enemy, SpellSlot.E)) * _percentpenetrationarmor;
                 }
                 else if (E.DamageType == TargetSelector.DamageType.True)
                 {
@@ -168,11 +168,11 @@ namespace DMGinc
             {
                 if (R.DamageType == TargetSelector.DamageType.Magical)
                 {
-                    damage += Player.CalcDamage(enemy, _Damage.DamageType.Magical, Player.GetSpellDamage(enemy, SpellSlot.R)) * percentpenetrationmagic;
+                    damage += Player.CalcDamage(enemy, _Damage.DamageType.Magical, Player.GetSpellDamage(enemy, SpellSlot.R)) * _percentpenetrationmagic;
                 }
                 else if (R.DamageType == TargetSelector.DamageType.Physical)
                 {
-                    damage += Player.CalcDamage(enemy, _Damage.DamageType.Physical, Player.GetSpellDamage(enemy, SpellSlot.R)) * percentpenetrationarmor;
+                    damage += Player.CalcDamage(enemy, _Damage.DamageType.Physical, Player.GetSpellDamage(enemy, SpellSlot.R)) * _percentpenetrationarmor;
                 }
                 else if (R.DamageType == TargetSelector.DamageType.True)
                 {
@@ -183,8 +183,8 @@ namespace DMGinc
 
             //damage += Player.CalcDamage(enemy, _Damage.DamageType.Physical, Player.GetAutoAttackDamage(enemy)); // no need for Autoattack Damage 
 
-            damage = ActiveItems.CalcDamage(enemy, damage); // active Items thanks xSalice :)
-            
+            damage = ActiveItems.CalcDamage(enemy, damage); // active Items thanks xSlaice :)
+
             return (float)damage;
 
         }

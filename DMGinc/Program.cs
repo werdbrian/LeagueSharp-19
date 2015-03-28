@@ -38,7 +38,7 @@ namespace DMGinc
         static void Main(string[] args)
         {
 
-            Game.OnUpdate += Game_OnGameUpdate;
+            CustomEvents.Game.OnGameLoad += Game_OnGameUpdate;
 
         }
 

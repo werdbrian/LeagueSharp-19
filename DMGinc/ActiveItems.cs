@@ -184,12 +184,12 @@ namespace DMGinc
                     if (KillableTarget)
                         Items.UseItem(item.ActiveId, Target);
 
-                    if (ObjectManager.Player.HealthPercentage() <= UseAtMyHp(item.ActiveName) && !OnlyIfKillable(item.ActiveName))
+                    if (ObjectManager.Player.HealthPercent <= UseAtMyHp(item.ActiveName) && !OnlyIfKillable(item.ActiveName))
                     {
                         Items.UseItem(item.ActiveId, Target);
                     }
 
-                    if (Target.HealthPercentage() <= UseAtEnemyHp(item.ActiveName) && !OnlyIfKillable(item.ActiveName))
+                    if (Target.HealthPercent <= UseAtEnemyHp(item.ActiveName) && !OnlyIfKillable(item.ActiveName))
                     {
                         Items.UseItem(item.ActiveId, Target);
                     }
@@ -215,12 +215,12 @@ namespace DMGinc
                 if (KillableTarget)
                     Items.UseItem(item.ActiveId);
 
-                if (ObjectManager.Player.HealthPercentage() <= UseAtMyHp(item.ActiveName) && !OnlyIfKillable(item.ActiveName))
+                if (ObjectManager.Player.HealthPercent <= UseAtMyHp(item.ActiveName) && !OnlyIfKillable(item.ActiveName))
                 {
                     Items.UseItem(item.ActiveId);
                 }
 
-                if (Target.HealthPercentage() <= UseAtEnemyHp(item.ActiveName) && !OnlyIfKillable(item.ActiveName))
+                if (Target.HealthPercent <= UseAtEnemyHp(item.ActiveName) && !OnlyIfKillable(item.ActiveName))
                 {
                     Items.UseItem(item.ActiveId);
                 }
@@ -249,13 +249,13 @@ namespace DMGinc
                         lastMura = Environment.TickCount;
                     }
 
-                    if (ObjectManager.Player.HealthPercentage() <= UseAtMyHp(item.ActiveName) && !OnlyIfKillable(item.ActiveName))
+                    if (ObjectManager.Player.HealthPercent <= UseAtMyHp(item.ActiveName) && !OnlyIfKillable(item.ActiveName))
                     {
                         Items.UseItem(item.ActiveId);
                         lastMura = Environment.TickCount;
                     }
 
-                    if (Target.HealthPercentage() <= UseAtEnemyHp(item.ActiveName) && !OnlyIfKillable(item.ActiveName))
+                    if (Target.HealthPercent <= UseAtEnemyHp(item.ActiveName) && !OnlyIfKillable(item.ActiveName))
                     {
                         Items.UseItem(item.ActiveId);
                         lastMura = Environment.TickCount;
@@ -267,6 +267,7 @@ namespace DMGinc
                 }
             }
         }
+
         public static float CalcDamage(Obj_AI_Base target, double currentDmg)
         {
             double dmg = currentDmg;
@@ -303,8 +304,7 @@ namespace DMGinc
             }
 
 
-            if (Ignite_Ready())
-                dmg += ObjectManager.Player.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite);
+            
 
             return (float)dmg;
         }

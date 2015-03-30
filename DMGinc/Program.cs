@@ -75,17 +75,17 @@ namespace DMGinc
             var _calc = new Menu("Calculations", "Calc");
             _menu.AddSubMenu(_calc);
 
-            CalcQ = new MenuItem("menu.Calc.calcQ", "calcQ").SetValue(true);
+            CalcQ = new MenuItem("menu.Calc.calcQ", "calculate Q Damage").SetValue(true);
             _calc.AddItem(CalcQ);
-            CalcW = new MenuItem("menu.Calc.calcW", "calcW").SetValue(true);
+            CalcW = new MenuItem("menu.Calc.calcW", "calculate W Damage").SetValue(true);
             _calc.AddItem(CalcW);
-            CalcE = new MenuItem("menu.Calc.calcE", "calcE").SetValue(true);
+            CalcE = new MenuItem("menu.Calc.calcE", "calculate E Damage").SetValue(true);
             _calc.AddItem(CalcE);
-            CalcR = new MenuItem("menu.Calc.calcR", "calcR").SetValue(true);
+            CalcR = new MenuItem("menu.Calc.calcR", "calculate R Damage").SetValue(true);
             _calc.AddItem(CalcR);
-            CalcItems = new MenuItem("menu.Calc.calcItems", "calcItems").SetValue(true);
+            CalcItems = new MenuItem("menu.Calc.calcItems", "calculate Items Damage").SetValue(true);
             _calc.AddItem(CalcItems);
-            CalcSummoners = new MenuItem("menu.Calc.calcSummoners", "calcSummoners").SetValue(true);
+            CalcSummoners = new MenuItem("menu.Calc.calcSummoners", "calculate SummonerSpell Damage").SetValue(true);
             _calc.AddItem(CalcSummoners);
 
             _menu.AddItem(new MenuItem("422442<ef<ef4242f", ""));

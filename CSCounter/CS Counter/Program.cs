@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Xml.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
-using LeagueSharp.Common.Render;
 using SharpDX;
 
 namespace CS_Counter
@@ -9,7 +13,7 @@ namespace CS_Counter
     class Program
     {
 
-        private static readonly Text Text = new Text(
+        private static readonly Render.Text Text = new Render.Text(
             0, 0, "", 15, new ColorBGRA(red: 255, green: 0, blue: 0, alpha: 255), "Verdana");
 
         private const int XOffset = 15;

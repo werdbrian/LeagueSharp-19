@@ -47,10 +47,10 @@ namespace UtilityAIO.extras
         }
         public bool IsReady()
         {
-            if (Id == (ItemId)2041)
-            {
-                return ObjectManager.Player.InventoryItems.Any(slot => slot.Id == Id && slot.Charges > 1) && !ObjectManager.Player.HasBuff(Name);
-            }
+            if (Id == (ItemId) 2041)
+                return ObjectManager.Player.InventoryItems.Any(slot => slot.Id == Id && slot.Charges >= 1) &&
+                       !ObjectManager.Player.HasBuff(Name);
+
             return ObjectManager.Player.InventoryItems.Any(slot => slot.Id == Id) && !ObjectManager.Player.HasBuff(Name);
         }
         public bool Cast()

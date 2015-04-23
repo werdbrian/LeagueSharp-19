@@ -30,99 +30,94 @@ namespace UtilityAIO.utilities
         }
         public AutoPot(Menu menu)
         {
-            Menuxx = menu.AddSubMenu(new Menu("AutoPotting", "AutoPotting"));
-            Menuxx.AddItem(new MenuItem("HPPotTrigger", "HP Percent Event").SetValue(new Slider(30)));
-            Menuxx.AddItem(new MenuItem("HealthPotion", "Health Potion").SetValue(true));
-            Menuxx.AddItem(new MenuItem("MPPotTrigger", "MP Percent Event").SetValue(new Slider(30)));
-            Menuxx.AddItem(new MenuItem("ManaPotion", "Mana Potion").SetValue(true));
+             menu = _menu.AddSubMenu(new Menu("Potion Manager", "PotionManager"));
+            _menu.AddItem(new MenuItem("HPTrigger", "HP Trigger Percent").SetValue(new Slider(30)));
+            _menu.AddItem(new MenuItem("HealthPotion", "Health Potion").SetValue(true));
+            _menu.AddItem(new MenuItem("MPTrigger", "MP Trigger Percent").SetValue(new Slider(30)));
+            _menu.AddItem(new MenuItem("ManaPotion", "Mana Potion").SetValue(true));
             _healthPotion = new Potion(ItemId.Health_Potion);
             _manaPotion = new Potion(ItemId.Mana_Potion);
             _biscuitPotion = new Potion((ItemId)2010);
             _flaskPotion = new Potion((ItemId)2041);
-            
+
             Game.OnUpdate += Game_OnGameUpdate;
         }
 
-        private void ResetTrigger()
-        {
-            HpTrigger = 100 - _healthPotion.HitHealthPercent;
-            if (ObjectManager.Player.MaxMana <= 0)
-            {
-                ManaCheck = false;
-                ManaTrigger = 0;
-            }
-            else
-            {
-                ManaTrigger = 100 - _manaPotion.HitManaPercent;
-            }
-        }
-
-
         private void Game_OnGameUpdate(EventArgs args)
         {
-            if (!ObjectManager.Player.IsDead && !ObjectManager.Player.InFountain() && !ObjectManager.Player.HasBuff("Recall"))
+            var hasEnemy = Utility.CountEnemiesInRange(1200) > 0;
+            Game.PrintChat(HealthCheck + " // " + _hero.HealthPercent + " // " + hasEnemy);
+
+            if ( !_hero.IsDead && !_hero.InFountain() && !_hero.HasBuff("Recall"))
             {
-                BarPot lastBar = new BarPot(ObjectManager.Player.TotalHeal, ObjectManager.Player.Mana);
-                bool hasEnemy = Utility.CountEnemiesInRange(800) > 0;
-                if (HealthCheck && ((lastBar.HealthPercent <= HpTrigger && hasEnemy || (lastBar.HealthPercent < 50))))
+                //gucken ob gegner in der Nähe sind
+                
+                
+
+                //wenn Healautopot
+                if (HealthCheck && _hero.HealthPercent <= HpTrigger && hasEnemy)
                 {
-                    if ((lastBar.ManaPercent <= ManaTrigger && hasEnemy || lastBar.ManaPercent < 50) && _flaskPotion.IsReady())
+                    // das nur benutzen wenn auch noch zusätzlich mana fehlt < 75%
+                    BarPot lastPot = new BarPot(HealthPrediction.GetHealthPrediction(_hero, _healthPotion.ProcessTime), _hero.Mana);
+                    if ((_hero.ManaPercent <= MpTrigger || _hero.ManaPercent < 75) && _flaskPotion.IsReady())
                     {
                         _flaskPotion.Cast();
                         return;
                     }
-                    if (_healthPotion.IsReady())
-                    {
-                        _healthPotion.Cast();
-                    }
-                    else if (_biscuitPotion.IsReady())
+
+                    // die anderen beiden varianten testen
+                    if (_biscuitPotion.IsReady())
                     {
                         _biscuitPotion.Cast();
                     }
-                    else if (_flaskPotion.IsReady())
+                    else if (_healthPotion.IsReady())
                     {
-                        _flaskPotion.Cast();
-                        return;
+                        _healthPotion.Cast();
                     }
+
                 }
-                if (ManaCheck && (lastBar.ManaPercent <= ManaTrigger && hasEnemy || lastBar.ManaPercent < 50))
+
+                if (ManaCheck && _hero.ManaPercent <= MpTrigger && hasEnemy)
                 {
+                    // benutzen für Mana logisch xD
                     if (_manaPotion.IsReady())
                     {
                         _manaPotion.Cast();
-                    }
-                    else if (_flaskPotion.IsReady())
+                    }// bei zusätzlich leben auch das :)
+                    else if (_flaskPotion.IsReady() && _hero.HealthPercent < 75)
                     {
                         _flaskPotion.Cast();
                     }
                 }
             }
         }
-        public readonly Menu Menuxx;
+
+        private readonly Menu _menu;
         private readonly Potion _healthPotion;
         private readonly Potion _manaPotion;
         private readonly Potion _biscuitPotion;
         private readonly Potion _flaskPotion;
+        private readonly Obj_AI_Hero _hero = ObjectManager.Player;
 
         public int HpTrigger
         {
-            get { return Menuxx.Item("HPTrigger").GetValue<Slider>().Value; }
-            set { Menuxx.Item("HPTrigger").SetValue(new Slider(value)); }
+            get { return _menu.Item("HPTrigger").GetValue<Slider>().Value; }
+            set { _menu.Item("HPTrigger").SetValue(new Slider(value)); }
         }
-        public int ManaTrigger
+        public int MpTrigger
         {
-            get { return Menuxx.Item("MPTrigger").GetValue<Slider>().Value; }
-            set { Menuxx.Item("MPTrigger").SetValue(new Slider(value)); }
-        }
+            get { return _menu.Item("MPTrigger").GetValue<Slider>().Value; }
+            set { _menu.Item("MPTrigger").SetValue(new Slider(value)); }
+        }           
         public bool HealthCheck
         {
-            get { return Menuxx.Item("HealthPotion").GetValue<bool>(); }
-            set { Menuxx.Item("HealthPotion").SetValue(value); }
+            get { return _menu.Item("HealthPotion").GetValue<bool>(); }
+            set { _menu.Item("HealthPotion").SetValue(value); }
         }
         public bool ManaCheck
         {
-            get { return Menuxx.Item("ManaPotion").GetValue<bool>(); }
-            set { Menuxx.Item("ManaPotion").SetValue(value); }
+            get { return _menu.Item("ManaPotion").GetValue<bool>(); }
+            set { _menu.Item("ManaPotion").SetValue(value); }
         }
     }
 }

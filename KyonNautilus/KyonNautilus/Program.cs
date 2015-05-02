@@ -2,7 +2,6 @@
 using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
-
 using Color = System.Drawing.Color;
 
 namespace KyonNautilus
@@ -185,7 +184,11 @@ namespace KyonNautilus
             }
 
         }
-   
+
+        private static void flee()
+        {
+            //TODO: Fleee action br000
+        }
 
         private static void Drawing_OnDraw(EventArgs args)
         {

@@ -133,7 +133,7 @@ namespace CS_Counter
                     }
                     else
                     {
-                        Text.text = _percent + " %" + " |  " + cs;
+                        Text.text = _percent + " %" + " |  " + cs + " / " + _minionsgesamt;
                     }
 
                     Text.OnEndScene();

@@ -13,10 +13,12 @@ namespace CS_Counter
     {
 
         private static readonly Render.Text Text = new Render.Text(
-            0, 0, "", 15, new ColorBGRA(red: 255, green: 0, blue: 0, alpha: 255), "Verdana");
+            0, 0, "", 12, new ColorBGRA(red: 255, green: 0, blue: 0, alpha: 255), "Verdana");
 
         private const int XOffset = 15;
         private const int YOffset = 35;
+
+        private static Line _line;
 
         private static Menu _menu2;
         private static MenuItem _menuenable2;
@@ -47,23 +49,19 @@ namespace CS_Counter
 
         static void Main(string[] args)
         {
-            if (args == null) throw new ArgumentNullException("args");
             CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
         }
 
         private static void Game_OnGameLoad(EventArgs args)
         {
 
-            Notifications.AddNotification("CS Counter loaded.", 10);
+            Notifications.AddNotification("CS Counter loaded.", 100);
 
             _menu2 = new Menu("CS Counter", "menu2", true);
             //var drawings2 = new Menu("Drawings", "drawings2");
             //_menu2.AddSubMenu(drawings2);
 
-            Sprite = new Sprite(Drawing.Direct3DDevice);
-            CdFrameTexture = Texture.FromMemory(
-                    Drawing.Direct3DDevice, (byte[])new ImageConverter().ConvertTo(Resources.Untitled_34, typeof(byte[])), 147,
-                    27, 0, Usage.None, Format.A1, Pool.Managed, Filter.Default, Filter.Default, 0);
+            _line = new Line(Drawing.Direct3DDevice);
 
             Textx = new Font(
                     Drawing.Direct3DDevice,
@@ -83,9 +81,9 @@ namespace CS_Counter
             _menu2.AddItem(_menuenable4);
             _advanced = new MenuItem("menu.drawings.advanced", "Advanced Farminfo (ME)").SetValue(false);
             _menu2.AddItem(_advanced);
-            _xPos = new MenuItem("menu.Calc.calc5", "X - Position").SetValue(new Slider(46, -100));
+            _xPos = new MenuItem("menu.Calc.calc5", "X - Position").SetValue(new Slider(0, -100));
             _menu2.AddItem(_xPos);
-            _yPos = new MenuItem("menu.Calc.calc6", "Y - Position").SetValue(new Slider(17, -100));
+            _yPos = new MenuItem("menu.Calc.calc6", "Y - Position").SetValue(new Slider(0, -100));
             _menu2.AddItem(_yPos);
 
 
@@ -125,7 +123,7 @@ namespace CS_Counter
 
         private static void GetCsEnemy()
         {
-            Sprite.Begin(SpriteFlags.AlphaBlend);
+           
 
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>())
             {
@@ -139,13 +137,17 @@ namespace CS_Counter
 
                 var cs = hero.MinionsKilled + hero.NeutralMinionsKilled + hero.SuperMonsterKilled;
                 var barPos = hero.HPBarPosition;
+                var pos = Drawing.WorldToScreen(hero.Position);
+                pos.X -= 50 + _xPos.GetValue<Slider>().Value;
+                pos.Y += 20 + _yPos.GetValue<Slider>().Value;
 
                 if (hero.IsMe && _menuenable3.GetValue<bool>())
                 {
-                    Text.X = (int)barPos.X + XOffset + 42;
-                    Text.Y = (int)barPos.Y + YOffset - 8;
+
+                    Text.X = (int)pos.X;
+                    Text.X += 110 / 6;
+                    Text.Y = (int)pos.Y;
                     Text.Color = new ColorBGRA(red: 255, green: 255, blue: 255, alpha: 255);
-                    Text.OutLined = true;
 
                     if (cs != 0)
                     {
@@ -158,31 +160,82 @@ namespace CS_Counter
 
                     if (!_advanced.GetValue<bool>())
                     {
+                        _line.Begin();
+                        _line.Draw(new[] { new Vector2(pos.X, pos.Y - 2), new Vector2(pos.X + 50, pos.Y - 2) }, new ColorBGRA(255, 255, 255, 255));
+                        _line.End();
+
+                        _line.Begin();
+                        _line.Draw(new[] { new Vector2(pos.X, pos.Y + 14), new Vector2(pos.X + 50, pos.Y + 14) }, new ColorBGRA(255, 255, 255, 255));
+                        _line.End();
+
+                        _line.Begin();
+                        _line.Draw(new[] { new Vector2(pos.X, pos.Y - 2), new Vector2(pos.X, pos.Y + 14) }, new ColorBGRA(255, 255, 255, 255));
+                        _line.End();
+
+                        _line.Begin();
+                        _line.Draw(new[] { new Vector2(pos.X + 50, pos.Y - 2), new Vector2(pos.X + 50, pos.Y + 14) }, new ColorBGRA(255, 255, 255, 255));
+                        _line.End();
+
                         Text.text = _percent + " %";
                     }
                     else
                     {
+                        _line.Begin();
+                        _line.Draw(new[] { new Vector2(pos.X, pos.Y - 2), new Vector2(pos.X + 100, pos.Y - 2) }, new ColorBGRA(255, 255, 255, 255));
+                        _line.End();
+
+
+                        _line.Begin();
+                        _line.Draw(new[] { new Vector2(pos.X, pos.Y + 14), new Vector2(pos.X + 100, pos.Y + 14) }, new ColorBGRA(255, 255, 255, 255));
+                        _line.End();
+
+                        _line.Begin();
+                        _line.Draw(new[] { new Vector2(pos.X, pos.Y - 2), new Vector2(pos.X, pos.Y + 14) }, new ColorBGRA(255, 255, 255, 255));
+                        _line.End();
+
+                        _line.Begin();
+                        _line.Draw(new[] { new Vector2(pos.X + 100, pos.Y - 2), new Vector2(pos.X + 100, pos.Y + 14) }, new ColorBGRA(255, 255, 255, 255));
+                        _line.End();
+
                         Text.text = _percent + " %" + " |  " + cs + " / " + _minionsgesamt;
                     }
 
                     Text.OnEndScene();
-                    Sprite.Draw(CdFrameTexture, new ColorBGRA(255, 255, 255, 255), null, new Vector3(-barPos.X + 25, -barPos.Y, 0));
+                    
                     continue;
                     
                 }
 
-                    Text.X = (int)barPos.X + XOffset + _xPos.GetValue<Slider>().Value;
-                    Text.Y = (int)barPos.Y + YOffset + 27 + _yPos.GetValue<Slider>().Value;
-                    Text.Color = new ColorBGRA(red: 255, green: 255, blue: 255, alpha: 255);
-                    Text.text = "CS Count: " + cs;
-                    Text.OnEndScene();
+                _line.Begin();
+                _line.Draw(new[] { new Vector2(pos.X, pos.Y - 2), new Vector2(pos.X + 100, pos.Y - 2) }, new ColorBGRA(255, 255 , 255, 255));
+                _line.End();
 
-                Sprite.Draw(CdFrameTexture, new ColorBGRA(255, 255, 255, 255), null, new Vector3(-barPos.X - 25, -barPos.Y - 6 , 0));
+                _line.Begin();
+                _line.Draw(new[] { new Vector2(pos.X, pos.Y + 14), new Vector2(pos.X + 100, pos.Y + 14) }, new ColorBGRA(255, 255, 255, 255));
+                _line.End();
 
+                _line.Begin();
+                _line.Draw(new[] { new Vector2(pos.X, pos.Y - 2), new Vector2(pos.X, pos.Y + 14) }, new ColorBGRA(255, 255, 255, 255));
+                _line.End();
+
+                _line.Begin();
+                _line.Draw(new[] { new Vector2(pos.X + 100, pos.Y - 2), new Vector2(pos.X + 100, pos.Y + 14) }, new ColorBGRA(255, 255, 255, 255));
+                _line.End();
+
+                Text.X = (int) pos.X;
+                Text.X += 110/6;
+
+                Text.Y = (int) pos.Y;
+                Text.Color = new ColorBGRA(red: 255, green: 255, blue: 255, alpha: 255);
+                Text.text = "CS Count: " + cs;
+                Text.OnEndScene();
+
+                
+                
                 
             }
 
-            Sprite.End();
+            
         }
     }
 }

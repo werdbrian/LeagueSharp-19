@@ -2,6 +2,7 @@
 using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
+using SharpDX;
 using Color = System.Drawing.Color;
 
 namespace PlebNautilus
@@ -52,27 +53,43 @@ namespace PlebNautilus
             TargetSelector.AddToMenu(ts);
 
             Menu combo = _menu.AddSubMenu(new Menu("combo", "combo"));
+            {
+                combo.AddItem(new MenuItem("CombouseQ", "Use Q").SetValue(true)); //y
+                combo.AddItem(new MenuItem("CombouseQundert", "Use Q under tower ?").SetValue(true)); //y
+                combo.AddItem(new MenuItem("CombouseW", "Use W").SetValue(true)); //y
+                combo.AddItem(new MenuItem("CombouseE", "Use E").SetValue(true)); //y
+                combo.AddItem(new MenuItem("CombouseR", "Use R").SetValue(true)); //y
+                combo.AddItem(new MenuItem("CombouseRkill", "R Killsteal ?").SetValue(true)); //y
+            }
+
             Menu laneclear = _menu.AddSubMenu(new Menu("laneclear", "laneclear"));
-            Menu misc = _menu.AddSubMenu(new Menu("misc", "misc"));
+            {
+                laneclear.AddItem(new MenuItem("laneuseQ", "Use Q").SetValue(true)); //y
+                laneclear.AddItem(new MenuItem("laneuseW", "Use W").SetValue(true)); //y
+                laneclear.AddItem(new MenuItem("laneuseE", "Use E").SetValue(true)); //y
+            }
+
+            Menu flee = _menu.AddSubMenu(new Menu("flee", "flee"));
+            {
+                flee.AddItem(new MenuItem("fleekey", "flee ! ").SetValue(new KeyBind('A', KeyBindType.Press))); //A
+                flee.AddItem(new MenuItem("fleeuseQ", "Use Q").SetValue(true)); //y
+                flee.AddItem(new MenuItem("fleeuseW", "Use W").SetValue(true)); //y
+                flee.AddItem(new MenuItem("fleeuseE", "Use E").SetValue(false)); //n
+            }
+
             Menu drawings = _menu.AddSubMenu(new Menu("drawings", "drawings"));
+            {
+                drawings.AddItem(new MenuItem("drawingsdrawQ", "Draw Q").SetValue(true)); //y
+                drawings.AddItem(new MenuItem("drawingsdrawW", "Draw W").SetValue(true)); //y
+                drawings.AddItem(new MenuItem("drawingsdrawE", "Draw E").SetValue(true)); //y
+                drawings.AddItem(new MenuItem("drawingsdrawR", "Draw R").SetValue(true)); //y
+            }
 
-            combo.AddItem(new MenuItem("CombouseQ", "Use Q").SetValue(true)); //y
-            combo.AddItem(new MenuItem("CombouseQundert", "Use Q under tower ?").SetValue(true)); //y
-            combo.AddItem(new MenuItem("CombouseW", "Use W").SetValue(true)); //y
-            combo.AddItem(new MenuItem("CombouseE", "Use E").SetValue(true)); //y
-            combo.AddItem(new MenuItem("CombouseR", "Use R").SetValue(true)); //y
-            combo.AddItem(new MenuItem("CombouseRkill", "R Killsteal ?").SetValue(true)); //y
-
-            laneclear.AddItem(new MenuItem("laneuseQ", "Use Q").SetValue(true));
-            laneclear.AddItem(new MenuItem("laneuseW", "Use W").SetValue(true));
-            laneclear.AddItem(new MenuItem("laneuseE", "Use E").SetValue(true));
-
-            drawings.AddItem(new MenuItem("drawingsdrawQ", "Draw Q").SetValue(true)); //y
-            drawings.AddItem(new MenuItem("drawingsdrawW", "Draw W").SetValue(true)); //y
-            drawings.AddItem(new MenuItem("drawingsdrawE", "Draw E").SetValue(true)); //y
-            drawings.AddItem(new MenuItem("drawingsdrawR", "Draw R").SetValue(true)); //y
-
-            misc.AddItem(new MenuItem("miscigniteuse", "Use Ignite").SetValue(true)); //y
+            Menu misc = _menu.AddSubMenu(new Menu("misc", "misc"));
+            {
+                misc.AddItem(new MenuItem("miscigniteuse", "Use Ignite").SetValue(true)); //y
+            }
+            
 
             _menu.AddToMainMenu();
             Interrupter2.OnInterruptableTarget += Interrupter2OnOnInterruptableTarget;
@@ -106,6 +123,11 @@ namespace PlebNautilus
 
         private static void Game_OnUpdate(EventArgs args)
         {
+            if (_menu.Item("fleekey").GetValue<KeyBind>().Active)
+            {
+                Flee();
+            }
+
             switch (_orbwalker.ActiveMode)
             {
                 case Orbwalking.OrbwalkingMode.Combo:
@@ -209,13 +231,69 @@ namespace PlebNautilus
 
         }
 
-        private static void flee()
+        // thanks to Insensitivity
+        private static void Flee()
         {
-            //TODO: Fleee action br000
+            Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos, false);
+
+            bool vQ = Q.IsReady() && _menu.Item("fleeuseQ").GetValue<bool>();
+            bool vW = W.IsReady() && _menu.Item("fleeuseQ").GetValue<bool>();
+            bool vE = E.IsReady() && _menu.Item("fleeuseE").GetValue<bool>();
+
+            var minions = ObjectManager.Get<Obj_AI_Minion>().Where(minion => minion.IsValidTarget(Q.Range)).ToList(); // Hopefully this is enough...
+            var step = Q.Range / 2; // Or whatever step value...
+
+            for (var i = step; i <= Q.Range; i += step)
+            {
+                if (ObjectManager.Player.Position.Extend(Game.CursorPos, i).IsWall() && Player.Distance(Game.CursorPos) >= Q.Range/2 && vQ)
+                {
+                    Q.Cast(Game.CursorPos);
+                }
+
+                var target =
+                    minions.FirstOrDefault(
+                     minion =>
+                       Geometry.CircleCircleIntersection(
+                                Player.Position.To2D(),
+                                minion.Position.To2D(),
+                                Q.Range,
+                                minion.BoundingRadius).Count() > 0);
+
+                if (target != null && target.Distance(Player.Position, false) >= Q.Range/2 && vQ )
+                {
+                    Q.Cast(target.Position);
+                }
+            }
+        }
+
+        static bool CheckWalls(Vector3 fromPosition, out Obj_AI_Hero target)
+        {
+
+            foreach (var target1 in HeroManager.Enemies.Where(h => h.IsValidTarget(E.Range) && !h.HasBuffOfType(BuffType.SpellShield) && !h.HasBuffOfType(BuffType.SpellImmunity)))
+            {
+                var pushDistance = (E.Range * 2) - Player.Distance(target1) - 150; // here is the things i need to change :(
+                var targetPosition = E.GetPrediction(target1).UnitPosition;
+                var finalPosition = targetPosition.Extend(fromPosition, -pushDistance);
+                var numberOfChecks = (float)Math.Ceiling(pushDistance / 30f);
+                for (var i = 1; i <= 30; i++)
+                {
+                    var v3 = (targetPosition - fromPosition).Normalized();
+                    var extendedPosition = targetPosition + v3 * (numberOfChecks * i);
+                    if (extendedPosition.IsWall() && (target1.Path.Count() < 2) && !target1.IsDashing())
+                    {
+                        target = target1;
+                        return true;
+                    }
+                }
+            }
+
+            target = null;
+            return false;
         }
 
         private static void Drawing_OnDraw(EventArgs args)
         {
+            if(Player.IsDead) return;
 
             if (Q.IsReady() && _menu.Item("drawingsdrawQ").GetValue<bool>())
             {

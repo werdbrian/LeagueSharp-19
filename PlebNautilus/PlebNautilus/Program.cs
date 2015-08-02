@@ -4,7 +4,7 @@ using LeagueSharp;
 using LeagueSharp.Common;
 using Color = System.Drawing.Color;
 
-namespace KyonNautilus
+namespace PlebNautilus
 {
     class Program
     {
@@ -75,9 +75,33 @@ namespace KyonNautilus
             misc.AddItem(new MenuItem("miscigniteuse", "Use Ignite").SetValue(true)); //y
 
             _menu.AddToMainMenu();
-
+            Interrupter2.OnInterruptableTarget += Interrupter2OnOnInterruptableTarget;
             Drawing.OnDraw += Drawing_OnDraw;
             Game.OnUpdate += Game_OnUpdate;
+        }
+
+        private static void Interrupter2OnOnInterruptableTarget(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
+        {
+            if (sender.IsEnemy && sender.Distance(Player) <= Q.Range && args.DangerLevel == Interrupter2.DangerLevel.High || args.DangerLevel == Interrupter2.DangerLevel.Medium )
+            {
+                var hitchance = Q.GetPrediction(sender, false, 0,
+                    new[]
+                    {
+                        CollisionableObjects.Heroes, CollisionableObjects.Minions, CollisionableObjects.Walls,
+                        CollisionableObjects.YasuoWall
+                    }).Hitchance;
+
+                if (hitchance == HitChance.VeryHigh || hitchance == HitChance.High || hitchance == HitChance.Immobile ||
+                    hitchance == HitChance.Dashing)
+                {
+                    Q.Cast(sender);
+                }
+            }
+            else if (sender.IsEnemy && _orbwalker.InAutoAttackRange(sender) && args.DangerLevel == Interrupter2.DangerLevel.High || args.DangerLevel == Interrupter2.DangerLevel.Medium)
+            {
+                Player.IssueOrder(GameObjectOrder.AutoAttack, sender);
+            }
+
         }
 
         private static void Game_OnUpdate(EventArgs args)

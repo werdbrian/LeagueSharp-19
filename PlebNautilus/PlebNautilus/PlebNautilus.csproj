@@ -7,8 +7,8 @@
     <ProjectGuid>{4115F0AD-2FAF-4B00-804F-8AED426F8855}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>KyonNautilus</RootNamespace>
-    <AssemblyName>KyonNautilus</AssemblyName>
+    <RootNamespace>PlebNautilus</RootNamespace>
+    <AssemblyName>PlebNautilus</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -37,13 +37,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="LeagueSharp">
-      <HintPath>C:\Users\Marvin\Downloads\LeagueSharp\System\LeagueSharp.dll</HintPath>
+      <HintPath>C:\Users\PlebKappaXD\Downloads\LeagueSharp\System\LeagueSharp.dll</HintPath>
     </Reference>
     <Reference Include="LeagueSharp.Common">
-      <HintPath>C:\Users\Marvin\Downloads\LeagueSharp\System\LeagueSharp.Common.dll</HintPath>
+      <HintPath>C:\Users\PlebKappaXD\Downloads\LeagueSharp\System\LeagueSharp.Common.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX">
-      <HintPath>C:\Users\Marvin\Downloads\LeagueSharp\System\SharpDX.dll</HintPath>
+      <HintPath>C:\Users\PlebKappaXD\Downloads\LeagueSharp\System\SharpDX.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

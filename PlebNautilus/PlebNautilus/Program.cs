@@ -75,6 +75,8 @@ namespace PlebNautilus
                 flee.AddItem(new MenuItem("fleeuseQ", "Use Q").SetValue(true)); //y
                 flee.AddItem(new MenuItem("fleeuseW", "Use W").SetValue(true)); //y
                 flee.AddItem(new MenuItem("fleeuseE", "Use E").SetValue(false)); //n
+                flee.AddItem(new MenuItem("fleeusewalls", "use walls").SetValue(true)); //y
+                flee.AddItem(new MenuItem("fleeuseminions", "use minions").SetValue(true)); //y
             }
 
             Menu drawings = _menu.AddSubMenu(new Menu("drawings", "drawings"));

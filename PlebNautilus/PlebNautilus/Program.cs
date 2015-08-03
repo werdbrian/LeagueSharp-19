@@ -31,7 +31,6 @@ namespace PlebNautilus
 
         static void Main(string[] args)
         {
-            if (args == null) throw new ArgumentNullException(nameof(args));
             CustomEvents.Game.OnGameLoad += Game_OnGameLoad;
         }
 

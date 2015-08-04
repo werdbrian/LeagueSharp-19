@@ -25,6 +25,8 @@ namespace PlebNautilus
         private static readonly int[] SmiteRed = { 3715, 3718, 3717, 3716, 3714 };
         private static readonly int[] SmiteBlue = { 3706, 3710, 3709, 3708, 3707 };
 
+        public static HpBarIndicator Hpi = new HpBarIndicator();
+
         private static SpellSlot _ignite;
  
         private static Menu _menu;
@@ -67,6 +69,12 @@ namespace PlebNautilus
                 combo.AddItem(new MenuItem("CombouseIgnite", "Use Ignite").SetValue(true)); //y
             }
 
+            var usageR = _menu.AddSubMenu((new Menu("Ult Settings", "Ultwork")));
+            {
+                foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(target => target.IsEnemy))
+                    usageR.AddItem(new MenuItem("DontR" + target.ChampionName, target.ChampionName).SetValue(false));
+            }
+           
             Menu killsteal = _menu.AddSubMenu(new Menu("killsteal", "Killsteal"));
             {
                 killsteal.AddItem(new MenuItem("ksinuse", "Killsteal").SetValue(true));
@@ -97,6 +105,7 @@ namespace PlebNautilus
                 drawings.AddItem(new MenuItem("drawingsdrawW", "Draw W").SetValue(true)); //y
                 drawings.AddItem(new MenuItem("drawingsdrawE", "Draw E").SetValue(true)); //y
                 drawings.AddItem(new MenuItem("drawingsdrawR", "Draw R").SetValue(true)); //y
+                drawings.AddItem(new MenuItem("drawingsdrawHP", "Draw Damage Indicator").SetValue(true)); //y
             }
 
             Menu misc = _menu.AddSubMenu(new Menu("misc", "misc"));
@@ -108,6 +117,7 @@ namespace PlebNautilus
             _menu.AddToMainMenu();
             Interrupter2.OnInterruptableTarget += Interrupter2OnOnInterruptableTarget;
             Drawing.OnDraw += Drawing_OnDraw;
+            Drawing.OnEndScene += OnEndScene;
             Game.OnUpdate += Game_OnUpdate;
         }
 
@@ -169,6 +179,19 @@ namespace PlebNautilus
 
         }
 
+        private static void OnEndScene(EventArgs args)
+        {
+            if (_menu.Item("drawingsdrawHP").GetValue<bool>())
+            {
+                foreach (var enemy in
+                    ObjectManager.Get<Obj_AI_Hero>().Where(ene => !ene.IsDead && ene.IsEnemy && ene.IsVisible))
+                {
+                    Hpi.unit = enemy;
+                    Hpi.DrawDmg(CalcDamage(enemy), Color.Green);
+                }
+            }
+        }
+
         private static void Game_OnUpdate(EventArgs args)
         {
             if (_menu.Item("fleekey").GetValue<KeyBind>().Active)
@@ -187,6 +210,49 @@ namespace PlebNautilus
             }
 
             Killsteal();
+        }
+
+        private static int CalcDamage(Obj_AI_Base target)
+        {
+            var aa = Player.GetAutoAttackDamage(target, true) * (1 + Player.Crit);
+            var damage = aa;
+            _ignite = Player.GetSpellSlot("summonerdot");
+
+            if (_ignite.IsReady())
+                damage += Player.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite);
+
+            if (R.IsReady()) // rdamage
+            {
+                    damage += R.GetDamage(target);
+            }
+
+            if (Q.IsReady()) // qdamage
+            {
+
+                damage += Q.GetDamage(target);
+            }
+
+            if (E.IsReady()) // edamage
+            {
+
+                damage += E.GetDamage(target);
+            }
+
+            if (_smite.IsReady()) // edamage
+            {
+
+                damage += GetSmiteDmg();
+            }
+
+            return (int)damage;
+        }
+
+        private static int GetSmiteDmg()
+        {
+            int level = Player.Level;
+            int index = Player.Level / 5;
+            float[] dmgs = { 370 + 20 * level, 330 + 30 * level, 240 + 40 * level, 100 + 50 * level };
+            return (int)dmgs[index];
         }
 
         private static void Laneclear()
@@ -227,18 +293,25 @@ namespace PlebNautilus
             var tsQ = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
             var tsR = TargetSelector.GetTarget(R.Range, TargetSelector.DamageType.Magical);
 
-            if (tsQ == null|| tsR == null || !tsQ.IsValidTarget() || !tsR.IsValidTarget())
+            if (tsQ == null|| tsR == null)
                 return;
 
             if (vR && tsR.IsValidTarget(R.Range) && tsR.Health > R.GetDamage(tsR))
-                R.CastOnUnit(tsR);
-
+            {
+                var useR = (_menu.Item("DontR" + tsR.ChampionName) != null &&
+                           _menu.Item("DontR" + tsR.ChampionName).GetValue<bool>() == false);
+                if (useR)
+                {
+                    R.CastOnUnit(tsR);
+                }
+            }
+                
             UseSmite(tsQ);
 
             if (vQ && tsQ.IsValidTarget())
             {
                 var qpred = Q.GetPrediction(tsQ);
-                if (qpred.CollisionObjects.Count(c => c.IsEnemy && !c.IsDead) < 3 && qpred.Hitchance >= HitChance.High)
+                if (qpred.CollisionObjects.Count(c => c.IsEnemy && !c.IsDead) < 4 && qpred.Hitchance >= HitChance.High)
                 {
                     Q.Cast(qpred.CastPosition);
                 }
@@ -288,7 +361,6 @@ namespace PlebNautilus
                 }
             }
         }
-
         //Credits to metaphorce
         public static void UseSmite(Obj_AI_Hero target)
         {

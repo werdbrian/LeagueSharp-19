@@ -58,8 +58,11 @@ namespace PlebNautilus
             }
         }
 
-        public Vector2 StartPosition => new Vector2(unit.HPBarPosition.X + Offset.X, unit.HPBarPosition.Y + Offset.Y);
+        public Vector2 StartPosition
+        {
 
+            get { return new Vector2(unit.HPBarPosition.X + Offset.X, unit.HPBarPosition.Y + Offset.Y); }
+        }
 
         private float GetHpProc(float dmg = 0)
         {

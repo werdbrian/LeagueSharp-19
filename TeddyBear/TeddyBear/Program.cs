@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
+using PlebNautilus;
 using SharpDX;
 using Color = System.Drawing.Color;
 
@@ -18,7 +18,14 @@ namespace TeddyBear
         private static Orbwalking.Orbwalker _orbwalker;
         private static Spell _q, _w, _e, _r;
         static Items.Item _botrk, _cutlass;
-        static SpellSlot _smiteslot;
+
+        public static HpBarIndicator Hpi = new HpBarIndicator();
+
+        //credits Kurisu
+        private static readonly int[] SmitePurple = { 3713, 3726, 3725, 3726, 3723 };
+        private static readonly int[] SmiteGrey = { 3711, 3722, 3721, 3720, 3719 };
+        private static readonly int[] SmiteRed = { 3715, 3718, 3717, 3716, 3714 };
+        private static readonly int[] SmiteBlue = { 3706, 3710, 3709, 3708, 3707 };
 
         private static void Main(string[] args)
         {
@@ -61,7 +68,6 @@ namespace TeddyBear
             _menu.AddSubMenu(targetSelector);
 
 
-
             var comboMenu = new Menu("Combo", "teddy.bear.combo");
             {
                 comboMenu.AddItem(new MenuItem("teddy.bear.combo.useq", "Use Q").SetValue(true));
@@ -71,32 +77,34 @@ namespace TeddyBear
             }
             _menu.AddSubMenu(comboMenu);
 
-            var harrassMenu = new Menu("Harass", "teddy.bear.harrass");
+
+            var laneclearing = new Menu("Lane clear", "teddy.bear.laneclearing");
             {
-                harrassMenu.AddItem(new MenuItem("teddy.bear.harrassuseq", "Use Q").SetValue(true));
-                harrassMenu.AddItem(new MenuItem("teddy.bear.harrassusew", "Use W").SetValue(true));
-                harrassMenu.AddItem(new MenuItem("teddy.bear.harrassusee", "Use E").SetValue(true));
+                laneclearing.AddItem(new MenuItem("teddy.bear.laneclearing.useQ", "Use Q").SetValue(true));
+                laneclearing.AddItem(new MenuItem("teddy.bear.laneclearing.useW", "Use W").SetValue(true));
+                laneclearing.AddItem(new MenuItem("teddy.bear.laneclearing.useE", "Use E").SetValue(true));
 
             }
-            _menu.AddSubMenu(harrassMenu);
+            _menu.AddSubMenu(laneclearing);
+
 
             var fleeMenu = new Menu("Flee", "teddy.bear.flee");
             {
-                fleeMenu.AddItem(new MenuItem("teddy.bear.flee.fleekey", "FLEEEEEEEEEE! ").SetValue(new KeyBind('A', KeyBindType.Press)));
-                fleeMenu.AddItem(new MenuItem("teddy.bear.flee.usew", "Use W").SetValue(true));
-                fleeMenu.AddItem(new MenuItem("teddy.bear.flee.usee", "Use E").SetValue(true));
+                fleeMenu.AddItem(new MenuItem("teddy.bear.flee.fleekey", "FLEEEEEEEEEE!").SetValue(new KeyBind('A', KeyBindType.Press)));
+                fleeMenu.AddItem(new MenuItem("teddy.bear.flee.useQ", "Use Q").SetValue(true));
+                fleeMenu.AddItem(new MenuItem("teddy.bear.flee.useE", "Use E").SetValue(true));
 
             }
             _menu.AddSubMenu(fleeMenu);
 
+
             var misc = new Menu("Misc", "teddy.bear.misc");
             {
-                misc.AddItem(new MenuItem("teddy.bear.misc.packets", "KS with W").SetValue(true));
-                misc.AddItem(new MenuItem("teddy.bear.misc.packets", "safe kill with W").SetValue(true));
+                misc.AddItem(new MenuItem("teddy.bear.misc.skW", "safe kill with W").SetValue(true));
                 misc.AddItem(new MenuItem("teddy.bear.misc.packets", "use packets").SetValue(true));
-                misc.AddItem(new MenuItem("teddy.bear.misc.exhaust", "use smite").SetValue(true));
             }
             _menu.AddSubMenu(misc);
+
 
             var drawingMenu = new Menu("Drawing", "teddy.bear.drawing");
             {
@@ -104,6 +112,7 @@ namespace TeddyBear
                 drawingMenu.AddItem(new MenuItem("DrawW", "Draw W range").SetValue(new Circle(true, Color.SpringGreen, _w.Range)));
                 drawingMenu.AddItem(new MenuItem("DrawE", "Draw E range").SetValue(new Circle(true, Color.SlateBlue, _e.Range)));
                 drawingMenu.AddItem(new MenuItem("DrawR", "Draw R range").SetValue(new Circle(true, Color.Red, _r.Range)));
+                drawingMenu.AddItem(new MenuItem("DrawHP", "Draw HP Indicator").SetValue(true));
             }
             _menu.AddSubMenu(drawingMenu);
 
@@ -114,13 +123,55 @@ namespace TeddyBear
             Interrupter2.OnInterruptableTarget += Interrupter_OnPossibleToInterrupt;
             Game.OnUpdate += Game_OnUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
+            Drawing.OnEndScene += OnEndScene;
             ShowNotification("TeddyBear - Loaded", 3000);
 
         }
 
         static void Interrupter_OnPossibleToInterrupt(Obj_AI_Base unit, Interrupter2.InterruptableTargetEventArgs args)
         {
+            if (args.DangerLevel >= Interrupter2.DangerLevel.High && unit.Distance(Player.Position) <= _q.Range)
+            {
+                _q.Cast(unit);
+            }
+        }
 
+        private static void OnEndScene(EventArgs args)
+        {
+            if (_menu.Item("DrawHP").GetValue<bool>())
+            {
+                foreach (var enemy in
+                    ObjectManager.Get<Obj_AI_Hero>().Where(ene => !ene.IsDead && ene.IsEnemy && ene.IsVisible))
+                {
+                    Hpi.unit = enemy;
+                    Hpi.DrawDmg(CalcDamage(enemy), Color.Green);
+                }
+            }
+        }
+
+        private static int CalcDamage(Obj_AI_Base target)
+        {
+            var aa = Player.GetAutoAttackDamage(target, true) * (1 + Player.Crit);
+            var damage = aa;
+
+            if (_r.IsReady()) // rdamage
+            {
+                damage += _r.GetDamage(target);
+            }
+
+            if (_q.IsReady()) // qdamage
+            {
+
+                damage += _q.GetDamage(target);
+            }
+
+            if (_e.IsReady()) // edamage
+            {
+
+                damage += _e.GetDamage(target);
+            }
+
+            return (int)damage;
         }
 
         public static void ShowNotification(string message, int duration = -1, bool dispose = true)
@@ -143,6 +194,11 @@ namespace TeddyBear
 
         private static void Game_OnUpdate(EventArgs args)
         {
+            if (_menu.Item("teddy.bear.flee.fleekey").GetValue<KeyBind>().Active)
+            {
+                Flee();
+            }
+
 
             switch (_orbwalker.ActiveMode)
             {
@@ -157,21 +213,43 @@ namespace TeddyBear
             }
         }
 
+        private static void Flee()
+        {
+            Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos, false);
+            _q.Cast();
+        }
+
         private static void Laneclear() // jungle clear ^^
         {
-            bool vQ = _q.IsReady() && _menu.Item("teddy.bear.laneclear.useq").GetValue<bool>();
-            bool vW = _w.IsReady() && _menu.Item("teddy.bear.combo.usew").GetValue<bool>();
-            bool vE = _e.IsReady() && _menu.Item("teddy.bear.combo.usee").GetValue<bool>();
+            bool vQ = _q.IsReady() && _menu.Item("teddy.bear.laneclearing.useQ").GetValue<bool>();
+            bool vW = _w.IsReady() && _menu.Item("teddy.bear.laneclearing.useW").GetValue<bool>();
+            bool vE = _e.IsReady() && _menu.Item("teddy.bear.laneclearing.useE").GetValue<bool>();
 
-            var minionBase = MinionManager.GetMinions(_w.Range, MinionTypes.All, MinionTeam.Neutral);
-            var jungleBase = MinionManager.GetMinions(_e.Range, MinionTypes.All, MinionTeam.Neutral);
+            var minionBase = MinionManager.GetMinions(_e.Range);
+            var jungleBase = MinionManager.GetMinions(_w.Range, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth);
+
+            #region Q-Cast Jungle
+            if (vQ)
+            {
+                foreach (var junglemob in jungleBase.Where(x => x.HealthPercent >= 25) )
+                {
+                    _q.Cast(junglemob);
+                }
+            }
+            #endregion
 
             #region W-Cast Jungle
             if (vW)
             {
-                foreach (var minion in minionBase.Where(minion => minion.Health < Player.CalcDamage(minion, Damage.DamageType.Magical, 1)))
+                foreach (Obj_AI_Minion junglemob in ObjectManager.Get<Obj_AI_Minion>().Where(
+                    x =>
+                        x.Name.Contains("SRU_Blue1.1.1") || x.Name.Contains("SRU_Blue7.1.1") ||
+                        x.Name.Contains("SRU_Red4.1.1") || x.Name.Contains("SRU_Red10.1.1") || 
+                        x.Name.Contains("SRU_Dragon6.1.1") || x.Name.Contains("SRU_Baron12.1.1") 
+                        && x.Health < _w.GetDamage(x)))
                 {
-                    _w.CastOnUnit(minion);
+                    if (junglemob.Health < _w.GetDamage(junglemob))
+                            _w.CastOnUnit(junglemob);
                 }
             }
             #endregion
@@ -184,10 +262,9 @@ namespace TeddyBear
                     _e.Cast();
                 }
 
-                foreach (Obj_AI_Minion junglemob in ObjectManager.Get<Obj_AI_Minion>().Where(
-                    x => x.Name.Contains("SRU_Blue1.1.1") || x.Name.Contains("SRU_Blue7.1.1") || x.Name.Contains("SRU_Red4.1.1") || x.Name.Contains("SRU_Red10.1.1") && x.IsValidTarget()))
+                if(minionBase.Count >= 3)
                 {
-                    _e.Cast(junglemob);
+                    _e.Cast();
                 }
 
             }
@@ -200,19 +277,71 @@ namespace TeddyBear
             bool vW = _w.IsReady() && _menu.Item("teddy.bear.combo.usew").GetValue<bool>();
             bool vE = _e.IsReady() && _menu.Item("teddy.bear.combo.usee").GetValue<bool>();
             bool vR = _r.IsReady() && _menu.Item("teddy.bear.combo.user").GetValue<bool>();
+            bool useskW = _menu.Item("teddy.bear.misc.skW").GetValue<bool>();
 
             Obj_AI_Hero tsQ = TargetSelector.GetTarget(_q.Range, TargetSelector.DamageType.Magical);
             Obj_AI_Hero tsR = TargetSelector.GetTarget(_r.Range, TargetSelector.DamageType.Magical);
 
-        }
+            #region Q-Cast
+            if (vQ)
+            {
+                if (tsQ.Distance(Player.Position) >= 2500 && tsQ.Direction == Player.Direction &&  tsQ.MoveSpeed > Player.MoveSpeed &&
+                    tsQ.MoveSpeed < Player.MoveSpeed*1.3)
+                {
+                    _q.Cast(tsQ);
+                }
+                if (tsQ.GetEnemiesInRange(100).Any(enemies => enemies.IsEnemy && !enemies.IsDead) && tsQ.IsValidTarget())
+                {
+                    _q.Cast(tsQ);
+                }
+                else if (Player.CountAlliesInRange(500) >= 1 && tsQ.IsValidTarget())
+                {
+                    _q.Cast(tsQ);
+                }
+                else if (tsQ.IsValidTarget())
+                {
+                    _q.Cast(tsQ);
+                }
+            }
+            #endregion
 
-        static int AlliesInRange(float range)
-        {
-            int count = 0;
-            foreach (Obj_AI_Hero hero in ObjectManager.Get<Obj_AI_Hero>())
-                if (hero.IsAlly && !hero.IsMe && Vector3.Distance(Player.Position, hero.Position) <= range) count++;
-            return count;
-        }
+            #region W-Cast
+            if (vW && useskW)
+            {
+                if (tsQ.IsValidTarget(_w.Range) && tsQ.Health < _w.GetDamage(tsQ))
+                {
+                    _w.CastOnUnit(tsQ);
+                }
+            }
+            else if (vW)
+            {
+                if (tsQ.IsValidTarget(_w.Range))
+                {
+                    _w.CastOnUnit(tsQ);
+                }
+            }
+            #endregion
 
+            #region E-Cast
+            if (vE)
+            {
+                if (tsQ.IsValidTarget(_e.Range) && tsQ.Distance(Player.Position) <= _w.Range)
+                {
+                    _e.Cast();
+                }
+            }
+            #endregion
+
+            #region R-Cast
+            if (vR)
+            {
+                if (tsR.IsValidTarget(Player.AttackRange) && tsR.HealthPercent > 25)
+                {
+                    _r.Cast();
+                }
+            }
+             #endregion
+
+        }
     }
 }

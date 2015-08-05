@@ -88,6 +88,8 @@ namespace PlebNautilus
                 laneclear.AddItem(new MenuItem("laneuseQ", "Use Q").SetValue(true)); //y
                 laneclear.AddItem(new MenuItem("laneuseW", "Use W").SetValue(true)); //y
                 laneclear.AddItem(new MenuItem("laneuseE", "Use E").SetValue(true)); //y
+                laneclear.AddItem(new MenuItem("laneE", "when x minions").SetValue(new Slider(3,1,10)));
+                laneclear.AddItem(new MenuItem("laneuntilmana", "min mana in %").SetValue(new Slider(25)));
             }
 
             Menu flee = _menu.AddSubMenu(new Menu("flee", "flee"));
@@ -260,7 +262,10 @@ namespace PlebNautilus
 
             var minion = MinionManager.GetMinions(Player.Position, Q.Range, MinionTypes.All, MinionTeam.All);
 
-            if (minion.Count >= 2 && E.IsReady() && minion.First().IsValidTarget(E.Range - 50) && _menu.Item("laneuseE").GetValue<bool>())
+            if(Player.ManaPercent <= _menu.Item("laneuntilmana").GetValue<Slider>().Value)
+                return;
+
+            if (minion.Count >= _menu.Item("laneE").GetValue<Slider>().Value && E.IsReady() && minion.First().IsValidTarget(E.Range - 50) && _menu.Item("laneuseE").GetValue<bool>())
             {
                 E.Cast(true);
             }
@@ -383,7 +388,6 @@ namespace PlebNautilus
 
             var minions = ObjectManager.Get<Obj_AI_Minion>().Where(minion => minion.IsValidTarget(Q.Range)).ToList(); // Hopefully this is enough...
             var step = Q.Range / 2; // Or whatever step value...
-
             for (var i = step; i <= Q.Range; i += step)
             {
                 if (ObjectManager.Player.Position.Extend(Game.CursorPos, i).IsWall() && Player.Distance(Game.CursorPos) >= Q.Range/2 && vQ)
@@ -406,7 +410,7 @@ namespace PlebNautilus
                 }
             }
 
-            if (vW)
+            if (vW && ObjectManager.Get<Obj_AI_Base>().Any(x => x.IsEnemy && x.Distance(Player.Position) <= Q.Range && Player.IsTargetable))
             {
                 W.Cast();
             }

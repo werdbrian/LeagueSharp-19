@@ -6,6 +6,7 @@ using LeagueSharp.Common;
 using _Damage = LeagueSharp.Common.Damage;
 using SharpDX;
 using Color = System.Drawing.Color;
+using Spells = DMGinc.Champions;
 
 namespace DMGinc
 {
@@ -17,10 +18,6 @@ namespace DMGinc
         private static Obj_AI_Hero _target;
         private static Menu _menu;
         private static Menu _calc;
-        public static Spell Q;
-        public static Spell W;
-        public static Spell E;
-        public static Spell R;
         private static MenuItem drawFill;
         private static MenuItem drawLine;
         private static MenuItem CalcQ;
@@ -58,7 +55,6 @@ namespace DMGinc
 
             //Game.PrintChat("<font color=\"#AF7AFF\"><b>Damage Indicator</b></font> for " + Player.ChampionName + " - Loaded");
             Notifications.AddNotification("Damage Indicator for " + Player.ChampionName, 10, true);
-
             #endregion
 
             #region Menushit
@@ -94,17 +90,11 @@ namespace DMGinc
             _menu.AddItem(new MenuItem("awfafaF", "Thanks for using !"));
 
             _menu.AddToMainMenu();
+
             #endregion
 
+            Spells.Load();
             Console.WriteLine("Menu Loaded");
-
-            #region Spells
-            Q = new Spell(SpellSlot.Q);
-            W = new Spell(SpellSlot.W);
-            E = new Spell(SpellSlot.E);
-            R = new Spell(SpellSlot.R);
-            #endregion
-
             Drawing.OnDraw += Drawing_OnDraw;
 
         }
@@ -142,21 +132,23 @@ namespace DMGinc
             var calcItems_ = _menu.Item("menu.Calc.calcItems").GetValue<bool>();
             var calcSummoners_ = _menu.Item("menu.Calc.calcSummoners").GetValue<bool>();
 
+            Console.WriteLine(Spells.Q.DamageType + " // " + Spells.W.DamageType + " // " + Spells.E.DamageType + " // " + Spells.R.DamageType);
+
             // Check Q Spell and Calc
             #region Q Spell Calc
-            if (Q.IsReady() && calcQ_)
+            if (Spells.Q.IsReady() && calcQ_)
             {
-                if (Q.DamageType == TargetSelector.DamageType.Magical)
+                if (Spells.Q.DamageType == TargetSelector.DamageType.Magical)
                 {
                     damage +=
                         Player.CalcDamage(enemy, _Damage.DamageType.Magical, Player.GetSpellDamage(enemy, SpellSlot.Q)) * _percentpenetrationmagic;
                 }
-                else if (Q.DamageType == TargetSelector.DamageType.Physical)
+                else if (Spells.Q.DamageType == TargetSelector.DamageType.Physical)
                 {
                     damage += 
                         Player.CalcDamage(enemy, _Damage.DamageType.Physical, Player.GetSpellDamage(enemy, SpellSlot.Q)) * _percentpenetrationarmor;
                 }
-                else if (Q.DamageType == TargetSelector.DamageType.True)
+                else if (Spells.Q.DamageType == TargetSelector.DamageType.True)
                 {
                     damage += 
                         Player.CalcDamage(enemy, _Damage.DamageType.True, Player.GetSpellDamage(enemy, SpellSlot.Q));
@@ -166,19 +158,19 @@ namespace DMGinc
 
             // Check W Spell and Calc
             #region W Spell Calc
-            if (W.IsReady() && calcW_)
+            if (Spells.W.IsReady() && calcW_)
             {
-                if (W.DamageType == TargetSelector.DamageType.Magical)
+                if (Spells.W.DamageType == TargetSelector.DamageType.Magical)
                 {
                     damage += 
                         Player.CalcDamage(enemy, _Damage.DamageType.Magical, Player.GetSpellDamage(enemy, SpellSlot.W)) * _percentpenetrationmagic;
                 }
-                else if (W.DamageType == TargetSelector.DamageType.Physical)
+                else if (Spells.W.DamageType == TargetSelector.DamageType.Physical)
                 {
                     damage += 
                         Player.CalcDamage(enemy, _Damage.DamageType.Physical, Player.GetSpellDamage(enemy, SpellSlot.W)) * _percentpenetrationarmor;
                 }
-                else if (W.DamageType == TargetSelector.DamageType.True)
+                else if (Spells.W.DamageType == TargetSelector.DamageType.True)
                 {
                     damage += Player.CalcDamage(enemy, _Damage.DamageType.True, Player.GetSpellDamage(enemy, SpellSlot.W));
                 }
@@ -187,17 +179,17 @@ namespace DMGinc
 
             // Check E Spell and Calc
             #region E Spell Calc
-            if (E.IsReady() && calcE_)
+            if (Spells.E.IsReady() && calcE_)
             {
-                if (E.DamageType == TargetSelector.DamageType.Magical)
+                if (Spells.E.DamageType == TargetSelector.DamageType.Magical)
                 {
                     damage += Player.CalcDamage(enemy, _Damage.DamageType.Magical, Player.GetSpellDamage(enemy, SpellSlot.E)) * _percentpenetrationmagic;
                 }
-                else if (E.DamageType == TargetSelector.DamageType.Physical)
+                else if (Spells.E.DamageType == TargetSelector.DamageType.Physical)
                 {
                     damage += Player.CalcDamage(enemy, _Damage.DamageType.Physical, Player.GetSpellDamage(enemy, SpellSlot.E)) * _percentpenetrationarmor;
                 }
-                else if (E.DamageType == TargetSelector.DamageType.True)
+                else if (Spells.E.DamageType == TargetSelector.DamageType.True)
                 {
                     damage += Player.CalcDamage(enemy, _Damage.DamageType.True, Player.GetSpellDamage(enemy, SpellSlot.E));
                 }
@@ -206,17 +198,17 @@ namespace DMGinc
 
             // Check R Spell and Calc
             #region R Spell Calc
-            if (R.IsReady() && calcR_)
+            if (Spells.R.IsReady() && calcR_)
             {
-                if (R.DamageType == TargetSelector.DamageType.Magical)
+                if (Spells.R.DamageType == TargetSelector.DamageType.Magical)
                 {
                     damage += Player.CalcDamage(enemy, _Damage.DamageType.Magical, Player.GetSpellDamage(enemy, SpellSlot.R)) * _percentpenetrationmagic;
                 }
-                else if (R.DamageType == TargetSelector.DamageType.Physical)
+                else if (Spells.R.DamageType == TargetSelector.DamageType.Physical)
                 {
                     damage += Player.CalcDamage(enemy, _Damage.DamageType.Physical, Player.GetSpellDamage(enemy, SpellSlot.R)) * _percentpenetrationarmor;
                 }
-                else if (R.DamageType == TargetSelector.DamageType.True)
+                else if (Spells.R.DamageType == TargetSelector.DamageType.True)
                 {
                     damage += Player.CalcDamage(enemy, _Damage.DamageType.True, Player.GetSpellDamage(enemy, SpellSlot.R));
                 }
@@ -234,6 +226,7 @@ namespace DMGinc
             return (float)damage;
 
         }
+
         private static bool Ignite_Ready()
         {
             if (IgniteSlot != SpellSlot.Unknown && ObjectManager.Player.Spellbook.CanUseSpell(IgniteSlot) == SpellState.Ready)

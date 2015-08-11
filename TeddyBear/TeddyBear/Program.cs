@@ -6,7 +6,7 @@ using Color = System.Drawing.Color;
 
 
 
-namespace TeddyBear
+namespace VoliPower
 {
     class Program
     {

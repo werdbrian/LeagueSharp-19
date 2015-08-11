@@ -3,7 +3,7 @@ using LeagueSharp;
 using SharpDX;
 using SharpDX.Direct3D9;
 
-namespace PlebNautilus
+namespace TeddyBear
 {
     class HpBarIndicator
     {

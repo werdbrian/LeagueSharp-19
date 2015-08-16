@@ -219,7 +219,7 @@ namespace DamageIndicator
             }
             #endregion
 
-            damage += Player.GetAutoAttackDamage(enemy) * AA; // no need for Autoattack Damage 
+            damage += Player.GetAutoAttackDamage(enemy, true) * AA; // no need for Autoattack Damage 
 
             if (calcItems_)
             damage = ActiveItems.CalcDamage(enemy, damage); // active Items thanks xSlaice :)

@@ -6,9 +6,9 @@ using LeagueSharp.Common;
 using _Damage = LeagueSharp.Common.Damage;
 using SharpDX;
 using Color = System.Drawing.Color;
-using Spells = DMGinc.Champions;
+using Spells = DamageIndicator.Champions;
 
-namespace DMGinc
+namespace DamageIndicator
 {
     class Program
     {
@@ -24,6 +24,7 @@ namespace DMGinc
         private static MenuItem CalcW;
         private static MenuItem CalcE;
         private static MenuItem CalcR;
+        private static MenuItem CalcAA;
         private static MenuItem CalcItems;
         private static MenuItem CalcSummoners;
         public delegate float DamageToUnitDelegate(Obj_AI_Hero hero);
@@ -79,6 +80,8 @@ namespace DMGinc
             _calc.AddItem(CalcE);
             CalcR = new MenuItem("menu.Calc.calcR", "calculate R Damage").SetValue(true);
             _calc.AddItem(CalcR);
+            CalcAA = new MenuItem("menu.Calc.calcAA", "calculate AA Damage").SetValue(new Slider(0, 1, 10));
+            _calc.AddItem(CalcAA);
             CalcItems = new MenuItem("menu.Calc.calcItems", "calculate Items Damage").SetValue(true);
             _calc.AddItem(CalcItems);
             CalcSummoners = new MenuItem("menu.Calc.calcSummoners", "calculate SummonerSpell Damage").SetValue(true);
@@ -131,8 +134,9 @@ namespace DMGinc
             var calcR_ = _menu.Item("menu.Calc.calcR").GetValue<bool>();
             var calcItems_ = _menu.Item("menu.Calc.calcItems").GetValue<bool>();
             var calcSummoners_ = _menu.Item("menu.Calc.calcSummoners").GetValue<bool>();
+            var AA = _menu.Item("menu.Calc.calcAA").GetValue<Slider>().Value;
 
-            Console.WriteLine(Spells.Q.DamageType + " // " + Spells.W.DamageType + " // " + Spells.E.DamageType + " // " + Spells.R.DamageType);
+            //Console.WriteLine(Spells.Q.DamageType + " // " + Spells.W.DamageType + " // " + Spells.E.DamageType + " // " + Spells.R.DamageType);
 
             // Check Q Spell and Calc
             #region Q Spell Calc
@@ -215,7 +219,7 @@ namespace DMGinc
             }
             #endregion
 
-            //damage += Player.CalcDamage(enemy, _Damage.DamageType.Physical, Player.GetAutoAttackDamage(enemy)); // no need for Autoattack Damage 
+            damage += Player.GetAutoAttackDamage(enemy) * AA; // no need for Autoattack Damage 
 
             if (calcItems_)
             damage = ActiveItems.CalcDamage(enemy, damage); // active Items thanks xSlaice :)

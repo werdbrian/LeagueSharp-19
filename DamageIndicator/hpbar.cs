@@ -9,7 +9,7 @@ using LeagueSharp.Common;
 using SharpDX;
 using Color = System.Drawing.Color;
 
-namespace DMGinc
+namespace DamageIndicator
 {
     internal class DamageIndicator
     {

@@ -106,7 +106,7 @@ namespace DamageIndicator
         {
 
         if (args == null) return;
-        if (DamageIndicator==null) return;
+        //if (DamageIndicator==null) return;
             if (Player.IsDead != true)
             {
                 _percentpenetrationarmor = ((1 - Player.PercentArmorPenetrationMod) + 1);
@@ -124,8 +124,7 @@ namespace DamageIndicator
         private static float GetComboDamage(Obj_AI_Base enemy)
         {
             // do nothing is there no enemy
-            if (enemy == null)
-                return 0;
+            if enemy == null returnl
 
             // reset values
             double damage = 0d;

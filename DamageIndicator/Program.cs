@@ -124,7 +124,7 @@ namespace DamageIndicator
         private static float GetComboDamage(Obj_AI_Base enemy)
         {
             // do nothing is there no enemy
-            if enemy == null returnl
+            if (enemy == null) return;
 
             // reset values
             double damage = 0d;

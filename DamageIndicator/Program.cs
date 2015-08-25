@@ -106,6 +106,7 @@ namespace DamageIndicator
         {
 
         if (args == null) return;
+        if (DamageIndicator==null) return;
             if (Player.IsDead != true)
             {
                 _percentpenetrationarmor = ((1 - Player.PercentArmorPenetrationMod) + 1);

@@ -105,7 +105,7 @@ namespace DamageIndicator
         private static void Drawing_OnDraw(EventArgs args)
         {
 
-        if (args != null) return;
+        if (args == null) return;
             if (Player.IsDead != true)
             {
                 _percentpenetrationarmor = ((1 - Player.PercentArmorPenetrationMod) + 1);
